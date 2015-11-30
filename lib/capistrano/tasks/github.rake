@@ -70,8 +70,8 @@ namespace :github do
     end
   end
 
-  print_deployment = -> d { puts "Deployment (#{d.last_state}): #{d.created_at} #{d.ref}@#{d.sha} to #{d.environment} by @#{d.creator_login}" }
-  print_status = -> s { puts "\t#{s.created_at} state: #{s.state}" }
+  print_deployment = -> d { puts "Deployment (#{d.last_state}): #{d.created_at} #{d.ref}@#{d.sha} to #{d.environment} by @#{d.creator_login}\n\tPAYLOAD: #{d.payload.to_h.to_json}" }
+  print_status = -> s { puts "\tSTATUS:  #{s.state} (#{s.created_at})" }
 
   desc 'List Github deployments'
   task :deployments do
@@ -87,6 +87,9 @@ namespace :github do
   task :last_deploy do
     gh = fetch(:github_deployment_api)
     env = fetch(:github_deployment)[:environment]
-    gh.deployments(environment: env).first.tap(&print_deployment)
+    deploy = gh.deployments(environment: env).first
+    status = deploy.statuses.first
+    print_deployment[deploy]
+    print_status[status]
   end
 end
